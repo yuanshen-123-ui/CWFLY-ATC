@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - ATC Center</title>
+  <link rel="icon" type="image/jpeg" href="/favicon.jpg" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: url('/bg-home.png') center / cover no-repeat fixed;
+      -webkit-font-smoothing: antialiased;
+    }
+    .login-container {
+      background: rgba(255,255,255,0.48);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 20px;
+      padding: 44px 40px;
+      width: 380px;
+      max-width: 90vw;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.06);
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .login-logo-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+    .login-header h1 {
+      font-size: 26px;
+      color: #1d1d1f;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .login-header p {
+      font-size: 14px;
+      color: #424245;
+    }
+    .login-header .badge {
+      display: inline-block;
+      background: rgba(0,113,227,0.1);
+      color: #0071e3;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 99px;
+      margin-top: 8px;
+      border: 1px solid rgba(0,113,227,0.2);
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #424245;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 28px;
+      font-size: 14px;
+      color: #1d1d1f;
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(12px) saturate(1.4);
+      -webkit-backdrop-filter: blur(12px) saturate(1.4);
+      outline: none;
+      transition: all .35s cubic-bezier(0.25,0.1,0.25,1);
+      box-sizing: border-box;
+    }
+    .form-group input:focus {
+      border-color: #0071e3;
+      box-shadow: 0 0 0 3px rgba(0,113,227,0.15);
+      background: rgba(255,255,255,0.4);
+    }
+    .form-group input::placeholder {
+      color: #86868b;
+    }
+    .error-msg {
+      background: rgba(255,69,58,0.1);
+      color: #bf2d24;
+      border: 1px solid rgba(255,69,58,0.2);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+    .login-btn {
+      width: 100%;
+      padding: 12px 24px;
+      background: #0071e3;
+      color: #fff;
+      border: 1px solid transparent;
+      border-radius: 980px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .35s cubic-bezier(0.25,0.1,0.25,1);
+      letter-spacing: -.01em;
+    }
+    .login-btn:hover { background: #0062c4; }
+    .login-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .login-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #86868b;
+    }
+    .login-footer a {
+      color: #0071e3;
+      text-decoration: none;
+    }
+    .login-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <img src="/logo.png" alt="ATC Center" class="login-logo-img">
+      <h1>ATC Center</h1>
+      <p>CW 模拟飞行管制员中心</p>
+      <span class="badge">需要登录</span>
+    </div>
+
+    <form id="loginForm" onsubmit="return handleLogin(event)">
+      <div class="form-group">
+        <label for="cid">CID</label>
+        <input id="cid" name="cid" type="text" placeholder="请输入您的 CID" required autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input id="password" name="password" type="password" placeholder="请输入密码" required autocomplete="current-password">
+      </div>
+
+      <div id="errorMsg" class="error-msg"></div>
+
+      <button type="submit" id="loginBtn" class="login-btn">登 录</button>
+    </form>
+
+    <div class="login-footer">
+      <p>使用 CWFLY 平台账号登录</p>
+      <p>没有账号？<a href="https://www.cwflysim.cn" target="_blank">前往注册</a></p>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin.includes('localhost')
+      ? 'http://localhost:3000/api'
+      : '/api'
+
+    // 已登录用户由 Vue Router 处理跳转，此处不操作避免死循环
+
+    async function handleLogin(event) {
+      event.preventDefault()
+      const cid = document.getElementById('cid').value.trim()
+      const password = document.getElementById('password').value
+      const errorMsg = document.getElementById('errorMsg')
+      const loginBtn = document.getElementById('loginBtn')
+
+      errorMsg.classList.remove('show')
+      loginBtn.disabled = true
+      loginBtn.textContent = '登录中...'
+
+      try {
+        const res = await fetch(API_BASE + '/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cid, password })
+        })
+        const data = await res.json()
+
+        if (data.success) {
+          const userData = data.data.user
+          // 权限检查：仅禁止纯飞行员（PILOT）
+          if (userData.fsdType === 'PILOT') {
+            errorMsg.textContent = '无权限访问 ATC Center，仅限管制员/教员登录'
+            errorMsg.classList.add('show')
+            loginBtn.disabled = false
+            loginBtn.textContent = '登 录'
+            return false
+          }
+
+          // 存储到 localStorage
+          localStorage.setItem('atc_token', data.data.token)
+          localStorage.setItem('atc_user', JSON.stringify(userData))
+
+          // 同步设置 cookie 供服务端验证
+          await fetch('/api/auth/login/setcookie', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: data.data.token, user: userData })
+          })
+
+          // 获取重定向地址
+          const params = new URLSearchParams(window.location.search)
+          const redirect = params.get('redirect') || '/'
+          window.location.href = redirect
+        } else {
+          errorMsg.textContent = data.message || '登录失败，请检查 CID 和密码'
+          errorMsg.classList.add('show')
+          loginBtn.disabled = false
+          loginBtn.textContent = '登 录'
+        }
+      } catch (e) {
+        errorMsg.textContent = '无法连接服务器，请稍后重试'
+        errorMsg.classList.add('show')
+        loginBtn.disabled = false
+        loginBtn.textContent = '登 录'
+      }
+
+      return false
+    }
+  </script>
+</body>
+</html>

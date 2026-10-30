@@ -1,0 +1,20 @@
+{
+  "name": "cw-atc-center",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev docs --port 5175",
+    "build": "vitepress build docs",
+    "start": "node server.js",
+    "prod": "npm run build && node server.js"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.0"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.0",
+    "http-proxy-middleware": "^3.0.3"
+  }
+}
