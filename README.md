@@ -149,4 +149,3 @@ pm2 reload cwfly-atc-api    # 仅后端 API 时
 | [CWFLY-BOT](https://github.com/yuanshen-123-ui/CWFLY-BOT) | QQ 机器人 |
 | [CWFLY-DOCS](https://github.com/yuanshen-123-ui/CWFLY-DOCS) | 面向用户的文档站（本仓库 `docs/` 是管制资料中心，二者不同） |
 
-> 本仓库由 CWFLY 主仓库于 2026-10-30 拆分而来，初始提交为当时快照（不含历史）。
